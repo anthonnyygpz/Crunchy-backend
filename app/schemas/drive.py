@@ -3,19 +3,19 @@ from typing import Optional
 
 
 class FileInfo(BaseModel):
-    nombre_archivo: str
-    contenido: str
+    file_name: str
+    content: str
     id_folder: str
 
 
 class UploadInfo(BaseModel):
-    ruta_archivo: str
+    file_path: str
     id_folder: str
 
 
 class DownloadInfo(BaseModel):
     id_drive: str
-    ruta_descarga: str
+    download_path: str
 
 
 class SearchQuery(BaseModel):
@@ -23,12 +23,12 @@ class SearchQuery(BaseModel):
 
 
 class MoveInfo(BaseModel):
-    id_archivo: str
+    id_file: str
     id_folder: str
 
 
 class FolderInfo(BaseModel):
-    nombre_carpeta: str
+    folder_name: str
     id_folder: Optional[str] = None
 
 

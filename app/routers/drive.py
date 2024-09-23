@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Optional
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
+from pydrive2.files import ApiRequestError
 
 from app.schemas.drive import (
     FolderContent,
@@ -14,15 +15,16 @@ from app.schemas.drive import (
     PermissionInfo,
 )
 
+
 router = APIRouter()
 
-directorio_credenciales = "credentials_module.json"
+credentials_directory = "credentials_module.json"
 
 
 def login():
-    GoogleAuth.DEFAULT_SETTINGS["client_config_file"] = directorio_credenciales
+    GoogleAuth.DEFAULT_SETTINGS["client_config_file"] = credentials_directory
     gauth = GoogleAuth()
-    gauth.LoadCredentialsFile(directorio_credenciales)
+    gauth.LoadCredentialsFile(credentials_directory)
 
     if gauth.credentials is None:
         gauth.LocalWebserverAuth(port_numbers=[8092])
@@ -31,115 +33,111 @@ def login():
     else:
         gauth.Authorize()
 
-    gauth.SaveCredentialsFile(directorio_credenciales)
-    credenciales = GoogleDrive(gauth)
-    return credenciales
+    gauth.SaveCredentialsFile(credentials_directory)
+    credentials = GoogleDrive(gauth)
+    return credentials
 
 
-@router.get("/listar_contenido_carpeta/{folder_id}", response_model=List[FolderContent])
-def listar_contenido_carpeta(folder_id: str):
-    credenciales = login()
+@router.get("/list_folder_contents/{folder_id}", response_model=List[FolderContent])
+def list_folder_contents(folder_id: str):
+    credentials = login()
     query = f"'{folder_id}' in parents and trashed=false"
-    lista_archivos = credenciales.ListFile({"q": query}).GetList()
+    file_list = credentials.ListFile({"q": query}).GetList()
 
-    contenido = []
-    for archivo in lista_archivos:
-        contenido.append(
+    content = []
+    for file in file_list:
+        content.append(
             FolderContent(
-                id=archivo["id"],
-                title=archivo["title"],
-                mimeType=archivo["mimeType"],
-                modifiedDate=archivo["modifiedDate"],
+                id=file["id"],
+                title=file["title"],
+                mimeType=file["mimeType"],
+                modifiedDate=file["modifiedDate"],
             )
         )
 
-    return contenido
+    return content
 
 
-@router.post("/crear_archivo_texto/")
-def crear_archivo_texto(file_info: FileInfo):
-    credenciales = login()
-    archivo = credenciales.CreateFile(
+@router.post("/create_text_file/")
+def create_text_file(file_info: FileInfo):
+    credentials = login()
+    file = credentials.CreateFile(
         {
-            "title": file_info.nombre_archivo,
+            "title": file_info.file_name,
             "parents": [{"kind": "drive#fileLink", "id": file_info.id_folder}],
         }
     )
-    archivo.SetContentString(file_info.contenido)
-    archivo.Upload()
+    file.SetContentString(file_info.content)
+    file.Upload()
     return {"message": "Archivo creado exitosamente"}
 
 
-@router.post("/subir_archivo/")
+@router.post("/file_upload/")
 def subir_archivo(upload_info: UploadInfo):
-    credenciales = login()
-    archivo = credenciales.CreateFile(
+    credentials = login()
+    file = credentials.CreateFile(
         {"parents": [{"kind": "drive#fileLink", "id": upload_info.id_folder}]}
     )
-    archivo["title"] = upload_info.ruta_archivo.split("/")[-1]
-    archivo.SetContentFile(upload_info.ruta_archivo)
-    archivo.Upload()
+    file["title"] = upload_info.file_path.split("/")[-1]
+    file.SetContentFile(upload_info.file_path)
+    file.Upload()
     return {"message": "Archivo subido exitosamente"}
 
 
-@router.post("/bajar_archivo_por_id/")
-def bajar_archivo_por_id(download_info: DownloadInfo):
-    credenciales = login()
-    archivo = credenciales.CreateFile({"id": download_info.id_drive})
-    nombre_archivo = archivo["title"]
-    archivo.GetContentFile(download_info.ruta_descarga + nombre_archivo)
-    return {"message": f"Archivo {nombre_archivo} descargado exitosamente"}
+@router.post("/download_file_by_id/")
+def download_file_by_id(download_info: DownloadInfo):
+    credentials = login()
+    file = credentials.CreateFile({"id": download_info.id_drive})
+    file_name = file["title"]
+    file.GetContentFile(download_info.download_path + file_name)
+    return {"message": f"Archivo {file_name} descargado exitosamente"}
 
 
-@router.post("/buscar/")
-def buscar(search_query: SearchQuery):
-    credenciales = login()
-    lista_archivos = credenciales.ListFile({"q": search_query.query}).GetList()
-    resultados = []
-    for f in lista_archivos:
-        resultados.append(
-            {
-                "ID Drive": f["id"],
-                "Nombre del archivo": f["title"],
-                "Tipo de archivo": f["mimeType"],
-                "Fecha de creación": f["createdDate"],
-                "Fecha de última modificación": f["modifiedDate"],
-                "Tamaño": f["fileSize"],
-            }
+@router.post("/search")
+def search_files(search_query: SearchQuery):
+    try:
+        credentials = login()
+        file_list = credentials.ListFile(
+            {"q": f"title contains '{search_query.query}' and trashed=false"}
+        ).GetList()
+        results = [{"title": file["title"], "id": file["id"]} for file in file_list]
+        return {"results": results}
+    except ApiRequestError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error al buscar en Google Drive: {str(e)}"
         )
-    return resultados
 
 
-@router.post("/borrar_archivo/{id_archivo}")
-def borrar_archivo(id_archivo: str):
-    credenciales = login()
-    archivo = credenciales.CreateFile({"id": id_archivo})
-    archivo.Trash()  # Mover a la papelera
+@router.post("/delete_file/{id_file}")
+def delete_file(id_file: str):
+    credentials = login()
+    file = credentials.CreateFile({"id": id_file})
+    file.Trash()  # Mover a la papelera
     return {"message": "Archivo movido a la papelera"}
 
 
-@router.post("/recuperar_archivo/{id_archivo}")
-def recuperar_archivo(id_archivo: str):
-    credenciales = login()
-    archivo = credenciales.CreateFile({"id": id_archivo})
-    archivo.UnTrash()  # Sacar de la papelera
+@router.post("/recover_file/{id_file}")
+def recover_file(id_file: str):
+    credentials = login()
+    file = credentials.CreateFile({"id": id_file})
+    file.UnTrash()  # Sacar de la papelera
     return {"message": "Archivo recuperado de la papelera"}
 
 
-@router.delete("/eliminar_permanentemente/{id_archivo}")
-def eliminar_permanentemente(id_archivo: str):
-    credenciales = login()
-    archivo = credenciales.CreateFile({"id": id_archivo})
-    archivo.Delete()  # Eliminar permanentemente
+@router.delete("/delete_permanet/{id_file}")
+def delete_permanent(id_file: str):
+    credentials = login()
+    file = credentials.CreateFile({"id": id_file})
+    file.Delete()  # Eliminar permanentemente
     return {"message": "Archivo eliminado permanentemente"}
 
 
-@router.post("/crear_carpeta/")
-def crear_carpeta(folder_info: FolderInfo):
-    credenciales = login()
-    folder = credenciales.CreateFile(
+@router.post("/create_folder/")
+def create_folder(folder_info: FolderInfo):
+    credentials = login()
+    folder = credentials.CreateFile(
         {
-            "title": folder_info.nombre_carpeta,
+            "title": folder_info.folder_name,
             "mimeType": "application/vnd.google-apps.folder",
             "parents": [{"kind": "drive#fileLink", "id": folder_info.id_folder}]
             if folder_info.id_folder
@@ -150,28 +148,28 @@ def crear_carpeta(folder_info: FolderInfo):
     return {"message": "Carpeta creada exitosamente", "folder_id": folder["id"]}
 
 
-@router.post("/mover_archivo/")
-def mover_archivo(move_info: MoveInfo):
-    credenciales = login()
-    archivo = credenciales.CreateFile({"id": move_info.id_archivo})
-    archivo["parents"] = [{"kind": "drive#fileLink", "id": move_info.id_folder}]
-    archivo.Upload(param={"supportsTeamDrives": True})
+@router.post("/move_file/")
+def move_file(move_info: MoveInfo):
+    credentials = login()
+    file = credentials.CreateFile({"id": move_info.id_file})
+    file["parents"] = [{"kind": "drive#fileLink", "id": move_info.id_folder}]
+    file.Upload(param={"supportsTeamDrives": True})
     return {"message": "Archivo movido exitosamente"}
 
 
-@router.get("/listar_permisos/{id_drive}")
-def listar_permisos(id_drive: str):
+@router.get("/list_permissions/{id_drive}")
+def list_permissions(id_drive: str):
     drive = login()
-    file1 = drive.CreateFile({"id": id_drive})
-    permisos = file1.GetPermissions()
-    return permisos
+    file = drive.CreateFile({"id": id_drive})
+    permissions = file.GetPermissions()
+    return permissions
 
 
-@router.post("/insertar_permisos/")
-def insertar_permisos(permission_info: PermissionInfo):
+@router.post("/insert_permissions/")
+def insert_permissions(permission_info: PermissionInfo):
     drive = login()
-    file1 = drive.CreateFile({"id": permission_info.id_drive})
-    permission = file1.InsertPermission(
+    file = drive.CreateFile({"id": permission_info.id_drive})
+    permission = file.InsertPermission(
         {
             "type": permission_info.type,
             "value": permission_info.value,
@@ -181,19 +179,19 @@ def insertar_permisos(permission_info: PermissionInfo):
     return {"message": "Permiso insertado exitosamente", "permission": permission}
 
 
-@router.delete("/eliminar_permisos/{id_drive}")
-def eliminar_permisos(
+@router.delete("/delete_permissions/{id_drive}")
+def delete_permissions(
     id_drive: str, permission_id: Optional[str] = None, email: Optional[str] = None
 ):
     drive = login()
-    file1 = drive.CreateFile({"id": id_drive})
+    file = drive.CreateFile({"id": id_drive})
     if permission_id:
-        file1.DeletePermission(permission_id)
+        file.DeletePermission(permission_id)
     elif email:
-        permissions = file1.GetPermissions()
-        for permiso in permissions:
-            if permiso.get("emailAddress") == email:
-                file1.DeletePermission(permiso["id"])
+        permissions = file.GetPermissions()
+        for permission in permissions:
+            if permission.get("emailAddress") == email:
+                file.DeletePermission(permission["id"])
     else:
         raise HTTPException(status_code=400, detail="Se requiere permission_id o email")
     return {"message": "Permiso(s) eliminado(s) exitosamente"}
