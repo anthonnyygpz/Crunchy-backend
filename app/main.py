@@ -1,10 +1,9 @@
 from fastapi import FastAPI
-from app.routers import crud_drive
+from app.routers import aws
 
 app = FastAPI()
 
-app.include_router(crud_drive.router)
-
+app.include_router(aws.router)
 
 if __name__ == "__main__":
     import uvicorn
