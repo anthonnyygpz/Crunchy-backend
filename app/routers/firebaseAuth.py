@@ -1,14 +1,12 @@
 import os
-from typing import Optional
 import requests
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from fastapi.security import HTTPBasic
-from firebase_admin import auth, credentials, initialize_app
+from firebase_admin import auth
 
 from app.schemas.firebaseAuth import (
     CreateUser,
     UserResponse,
-    UserList,
     UserRegister,
 )
 
@@ -16,17 +14,15 @@ router = APIRouter()
 security = HTTPBasic()
 
 
-cred = credentials.Certificate("service-firebase.json")
-initialize_app(cred)
-
-
-@router.post("/register_user/")
+@router.post("/register_user/{user_name}")
 def create_user(user: CreateUser):
     try:
         user_record = auth.create_user(email=user.email, password=user.password)
         return {"message": "User created successfully!", "uid": user_record}
+    except auth.UserNotFoundError:
+        raise HTTPException(status_code=404, detail="User not found")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to create user: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/login_user/")
@@ -47,8 +43,10 @@ def login_user(user: UserRegister):
             )
         id_token = response_data["idToken"]
         return {"message": "User logged in successfully!", "id_token": id_token}
+    except auth.UserNotFoundError:
+        raise HTTPException(status_code=404, detail="User not found")
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to login user: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/get_user/{uid}", response_model=UserResponse)
@@ -67,24 +65,15 @@ async def get_user(uid: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/list_users", response_model=UserList)
-async def list_users(
-    max_results: int = Query(1000, le=1000), page_token: Optional[str] = None
-):
+@router.post("/add_name/{uid}/{user_name}")
+async def add_name(uid: str, user_name: str):
     try:
-        page = auth.list_users(max_results=max_results, page_token=page_token)
-        users = [
-            UserResponse(
-                uid=user.uid,
-                email=user.email,
-                display_name=user.display_name,
-                email_verified=user.email_verified,
-            )
-            for user in page.users
-        ]
-        return UserList(users=users, next_page_token=page.next_page_token)
+        user = auth.update_user(uid, display_name=user_name)
+        return user
+    except auth.UserNotFoundError:
+        raise HTTPException(status_code=404, detail="User not found")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list users: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/disabled_user/{uid}")
