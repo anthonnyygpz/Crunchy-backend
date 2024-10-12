@@ -4,8 +4,6 @@ from mysql.connector import Error
 from datetime import datetime
 import time
 
-from starlette.types import HTTPExceptionHandler
-
 from app.db.mysql import mydb
 from app.schemas.playlist import CreatePlaylist
 
@@ -34,7 +32,6 @@ async def create_playlist(create_playlist: CreatePlaylist):
         mycursor.execute(query, data)
         mydb.commit()
         return {"playlist": "Playlist created successfully"}
-        # mycursor.execute("INSERT INTO Playlist (addedAt, description, duration, oderVideo,thumbnailUrl,title,videoUrl)")
     except Error as e:
         raise HTTPException(status_code=400, detail=f"Error while creating: {str(e)}")
 
