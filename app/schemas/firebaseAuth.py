@@ -14,11 +14,6 @@ class UserResponse(BaseModel):
     email_verified: bool
 
 
-class UserList(BaseModel):
-    users: list[UserResponse]
-    next_page_token: Optional[str] = None
-
-
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
