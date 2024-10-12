@@ -11,7 +11,7 @@ mydb = mysql.connector.connect(
     collation=os.getenv("COLLATION"),
     database=os.getenv("DATABASE_MYSQL"),
 )
-if mydb.is_connected():
-    print("Connected to the MySQL Server")
-else:
-    print("Error in connection")
+# if mydb.is_connected():
+#     print("Connected to the MySQL Server")
+# else:
+#     print("Error in connection")
