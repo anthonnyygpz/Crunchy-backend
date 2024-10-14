@@ -1,11 +1,11 @@
 from fastapi import FastAPI
-from app.routers import aws
+from app.routers import videos
 from app.routers import firebaseAuth
 from app.routers import playlist
 
-app = FastAPI()
+app = FastAPI(openapi_url="/openapi.json/")
 
-app.include_router(aws.router)
+app.include_router(videos.router)
 app.include_router(firebaseAuth.router)
 app.include_router(playlist.router)
 
