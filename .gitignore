@@ -1,6 +1,5 @@
 .venv
 __pycache__
 .env
-service-firebase.json
 mysql.sql
-pruebas.py
+tests/
