@@ -15,7 +15,11 @@ mycursor = mydb.cursor()
 timeStamp = datetime.fromtimestamp(time.time())
 
 
-@router.post("/playlist/")
+@router.post(
+    "/playlists/",
+    summary="Crear lista de reproduccion",
+    description="Create playlist of the user",
+)
 async def create_playlist(create_playlist: CreatePlaylist):
     try:
         query = "INSERT INTO Playlist(createdAt,createdBy,isPlublic,thumbnailUrl,title,updatedAt,videoCount,videoId) VALUES(%s,%s,%s,%s,%s,%s,%s,%s);"
