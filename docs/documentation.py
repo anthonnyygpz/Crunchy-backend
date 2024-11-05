@@ -21,12 +21,12 @@ def configure_docs(app: FastAPI):
                 "description": "Operaciones con usuarios",
             },
             {
-                "name": "aws",
-                "description": "Operaciones con videos",
-            },
-            {
                 "name": "verify",
                 "description": "Operaciones con verificacio",
+            },
+            {
+                "name": "videos",
+                "description": "Operaciones con videos",
             },
         ]
 
