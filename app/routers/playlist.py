@@ -4,15 +4,11 @@ from mysql.connector import Error
 from datetime import datetime
 import time
 
-from app.db.mysql import mydb
 from app.schemas.playlist import CreatePlaylist
 
 load_dotenv()
 
 router = APIRouter()
-mycursor = mydb.cursor()
-
-timeStamp = datetime.fromtimestamp(time.time())
 
 
 @router.post(
