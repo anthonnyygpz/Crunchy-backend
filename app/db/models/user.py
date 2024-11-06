@@ -14,4 +14,6 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=False)
     user_name = Column(String(50), unique=True, nullable=True)
     is_active = Column(Boolean(), default=1, nullable=False)
-    # email_verified = Column(Boolean(), default=0, nullable=False)
+
+    # def __repr__(self):
+    #     return f"<User (user_id={self.user_id}, full_name='{self.full_name}',email='{self.email}', profile_picture_url='{self.profile_picture_url}', user_name='{self.user_name}')>"  # email_verified = Column(Boolean(), default=0, nullable=False)

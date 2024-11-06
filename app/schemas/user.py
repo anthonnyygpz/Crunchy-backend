@@ -6,17 +6,19 @@ from pydantic import BaseModel, EmailStr
 class UserBase(BaseModel):
     email: EmailStr
     full_name: str
-    is_active: bool
     user_name: str
+    profile_picture_url: Optional[str]
 
 
 class UserCreate(UserBase):
-    profile_picture_url: Optional[str]
+    pass
 
 
-class UserGet(UserBase):
-    user_id: str
-    profile_picture_url: Optional[str]
+class UserUpdate(BaseModel):
+    is_active: bool
+    user_name: str
+    profile_picture_url: str
+    full_name: str
 
 
 class UserResponse(UserBase):

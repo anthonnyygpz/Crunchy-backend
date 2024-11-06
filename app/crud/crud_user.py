@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlalchemy.orm import Session
 from app.db.models.user import User
-from app.schemas.user import UserCreate, UserGet, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
 from fastapi import HTTPException
 from firebase_admin import auth
@@ -43,3 +43,31 @@ class UserDB:
         if user is None:
             raise HTTPException(status_code=404, detail="User not found DB")
         return user
+
+    def update_user(self, user_id: str, user: UserUpdate):
+        try:
+            db_user = self.db.query(User).filter(User.user_id == user_id).first()
+            if not db_user:
+                raise HTTPException(status_code=404, detail="User not found")
+
+            for key, value in user.model_dump().items():
+                setattr(db_user, key, value)
+
+            self.db.commit()
+            self.db.refresh(db_user)
+            return {"message": "Data user update successfully"}
+        except Exception as e:
+            self.db.rollback()
+            raise HTTPException(status_code=400, detail=f"Error: {str(e)}")
+
+    def delete_user(self, user_id: str):
+        try:
+            db_user = self.db.query(User).filter(User.user_id == user_id).first()
+            if db_user is None:
+                raise HTTPException(status_code=404, detail="Task not found")
+
+            self.db.delete(db_user)
+            self.db.commit()
+            return {"message": "User deleted successfully"}
+        except Exception as e:
+            raise HTTPException(status_code=404, detail=f"User not found: {str(e)}")

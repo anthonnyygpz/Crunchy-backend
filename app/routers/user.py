@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from app.dependencies import get_db
 from sqlalchemy.orm import Session
 
 
-from app.schemas.user import UserResponse, UserCreate
-from app.db.models.user import User
-from app.services.user import UserService
+from app.schemas.user import UserResponse, UserCreate, UserUpdate
+from app.services.user import UserService, UserServiceDB
 
 router = APIRouter()
 
@@ -18,7 +17,7 @@ router = APIRouter()
     tags=["users"],
 )
 async def create_user(user: UserCreate, password: str, db: Session = Depends(get_db)):
-    return UserService(db).create_user(user, password)
+    return UserServiceDB(db).create_user(user, password)
 
 
 @router.get(
@@ -29,27 +28,17 @@ async def create_user(user: UserCreate, password: str, db: Session = Depends(get
     tags=["users"],
 )
 async def read_user(user_id: str, db: Session = Depends(get_db)):
-    return UserService(db).get_user_by_id(user_id)
+    return UserServiceDB(db).get_user_by_id(user_id)
 
 
 @router.put(
     "/users/{user_id}",
-    response_model=UserResponse,
     summary="Actualizar datos del usuario.",
     description="Aquí se le asigna el nombre al usuario",
     tags=["users"],
 )
-async def update_user(user_id: str, user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.user_id == user_id).first()
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    for var, value in vars(user).items():
-        setattr(db_user, var, value)
-
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+async def update_user(user_id: str, user: UserUpdate, db: Session = Depends(get_db)):
+    return UserServiceDB(db).update_user(user_id, user)
 
 
 @router.delete(
@@ -59,41 +48,14 @@ async def update_user(user_id: str, user: UserCreate, db: Session = Depends(get_
     tags=["users"],
 )
 async def delete_user(user_id: str, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.user_id == user_id).first()
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    db.delete(db_user)
-    db.commit()
-    return {"message": "Task deleted successfully"}
+    return UserServiceDB(db).delete_user(user_id)
 
 
-# @router.post(
-#     "/users/{email_reset}",
-#     response_model=dict,
-#     summary="reinicio de contraseña.",
-#     description="Se envia a tu correo electronico una url para restablecer la contraseña.",
-#     tags=["users"],
-# )
-# async def send_password_reset(
-#     email_reset: EmailStr = Path(
-#         title="Correo electronico.",
-#         description="Aqui se coloca el correo que se le enviara la url del restablecimiento de contraseña.",
-#     ),
-# ):
-#     url = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode"
-#     data = {"requestType": "PASSWORD_RESET", "email": email_reset}
-#     headers = {"Content-Type": "application/json"}
-#     try:
-#         response = requests.post(
-#             url,
-#             headers=headers,
-#             json=data,
-#             params={"key": os.getenv("FIREBASE_API_KEY")},
-#         )
-#         response.raise_for_status()
-#         return {"message": "A password reset link has been sent to your email"}
-#     except requests.exceptions.RequestException as e:
-#         raise HTTPException(
-#             status_code=500, detail=f"Error al enviar el correo: {str(e)}"
-#         )
+@router.post(
+    "/users/{email}",
+    summary="Reiniciar contraseña",
+    description="Envia un a tu correo un link para cambiar la contraseña.",
+    tags=["users"],
+)
+async def password_reset(email: str):
+    return UserService().password_reset(email)
