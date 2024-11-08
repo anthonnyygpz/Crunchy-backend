@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 from firebase_admin import auth
 
-from app.schemas.user import UserResponse, UserCreate, UserUpdate, UserLogin
+from app.schemas.user import UserCreate, UserUpdate, UserLogin
 from app.services.user import UserService, UserServiceDB
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 

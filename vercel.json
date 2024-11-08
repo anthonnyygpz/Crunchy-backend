@@ -1,0 +1,13 @@
+{
+  "builds": [
+    {
+      "src": "app/main.py"
+    }
+  ],
+  "router": [
+    {
+      "src": "/(.*)",
+      "dest": "app/main.py"
+    }
+  ]
+}
