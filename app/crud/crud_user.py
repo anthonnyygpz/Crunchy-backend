@@ -14,6 +14,7 @@ class UserDB:
     def create_user(self, firebase_uid: str, user: UserCreate) -> Optional[UserCreate]:
         try:
             db_user = User(**user.model_dump(), user_id=firebase_uid)
+            print(db_user)
 
             existing_mysql_user = (
                 self.db.query(User).filter(User.email == user.email).first()
@@ -33,7 +34,9 @@ class UserDB:
                 status_code=400, detail="Email already exists in Firebase"
             )
         except HTTPException as he:
-            raise he  # Re-lanzamos las HTTP exceptions que ya hemos creado
+            raise HTTPException(
+                status_code=400, detail=str(he)
+            )  # Re-lanzamos las HTTP exceptions que ya hemos creado
         except Exception as e:
             self.db.rollback()  # Hacemos rollback en caso de error
             raise HTTPException(status_code=500, detail=str(e))
@@ -44,9 +47,9 @@ class UserDB:
             raise HTTPException(status_code=404, detail="User not found DB")
         return user
 
-    def update_user(self, user_id: str, user: UserUpdate):
+    def update_user(self, user: UserUpdate, token: dict):
         try:
-            db_user = self.db.query(User).filter(User.user_id == user_id).first()
+            db_user = self.db.query(User).filter(User.user_id == token["uid"]).first()
             if not db_user:
                 raise HTTPException(status_code=404, detail="User not found")
 

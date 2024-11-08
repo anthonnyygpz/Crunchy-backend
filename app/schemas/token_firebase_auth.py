@@ -1,10 +1,20 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 
-class TokenRequest(BaseModel):
-    email: EmailStr = Field(..., description="Correo electrónico del usuario")
-    password: str = Field(..., description="Contraseña del usuario")
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 
 
-class TokenVerify(BaseModel):
-    token_id: str = Field(..., description="Token generado para validar")
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str
+    name: Optional[str] = None
+
+
+class UserResponse(BaseModel):
+    email: str
+    token: str
+    refresh_token: str
+    name: Optional[str] = None

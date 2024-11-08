@@ -21,10 +21,23 @@ class UserUpdate(BaseModel):
     full_name: str
 
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class UserLoginResponse(BaseModel):
+    email: str
+    token: str
+    refresh_token: str
+
+
 class UserResponse(UserBase):
     user_id: str
     created_at: datetime
     updated_at: datetime
+    is_active: bool
+    email_verified: bool
 
     class Config:
         orm_mode = True
