@@ -99,7 +99,7 @@ class UserService:
             raise HTTPException(status_code=500, detail=str(e))
 
     def refresh_token(self, refresh_token: str):
-        url = f"https://securetoken.googleapis.com/v1/token?key={os.getenv("FIREBASE_API_KEY")}"
+        url = f"https://securetoken.googleapis.com/v1/token?key={os.getenv('FIREBASE_API_KEY')}"
         payload = {"grant_type": "refresh_token", "refresh_token": refresh_token}
         try:
             response = requests.post(url, json=payload)
