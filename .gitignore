@@ -4,3 +4,4 @@ __pycache__
 mysql.sql
 tests/
 base1.py
+.vercel
