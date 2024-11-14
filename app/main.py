@@ -1,9 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import (
-    movies,
-    user,
-)
+from app.routers import movies, user
 from docs.documentation import configure_docs
 
 app = FastAPI(title="Crunchy", version="1.0.0")
@@ -25,4 +22,4 @@ configure_docs(app)
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=10000)
