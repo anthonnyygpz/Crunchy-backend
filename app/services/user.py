@@ -51,7 +51,7 @@ class UserServiceDB:
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-    def get_current_user(self, token: dict):
+    def get_user_current_data(self, token: dict):
         try:
             user_id = auth.get_user(token["uid"])
             user = self.user_db.get_user_by_id(user_id.uid)

@@ -27,7 +27,7 @@ async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(secur
 
 
 @router.post(
-    "/api/register_users/",
+    "/api/register_users",
     response_model=UserCreate,
     summary="Crear usuarios",
     description="Registrar usuarios con autenticación",
@@ -38,15 +38,15 @@ async def create_user(user: UserCreate, password: str, db: Session = Depends(get
 
 
 @router.get(
-    "/api/get_user_current/",
+    "/api/get_user_current_data",
     summary="Obtener los datos del usuario.",
     description="Obtiene todo datos del usuario.",
     tags=["users"],
 )
-async def get_user_current(
+async def get_user_current_data(
     token: dict = Depends(verify_token), db: Session = Depends(get_db)
 ):
-    return UserServiceDB(db).get_current_user(token)
+    return UserServiceDB(db).get_user_current_data(token)
 
 
 @router.put(

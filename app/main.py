@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import (
-    videos,
+    movies,
     user,
 )
 from docs.documentation import configure_docs
@@ -9,7 +9,7 @@ from docs.documentation import configure_docs
 app = FastAPI(title="Crunchy", version="1.0.0")
 
 app.include_router(user.router)
-app.include_router(videos.router)
+app.include_router(movies.router)
 
 app.add_middleware(
     CORSMiddleware,
