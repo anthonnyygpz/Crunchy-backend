@@ -21,8 +21,8 @@ def configure_docs(app: FastAPI):
                 "description": "Operaciones con usuarios",
             },
             {
-                "name": "videos",
-                "description": "Operaciones con videos",
+                "name": "movies",
+                "description": "Operaciones con peliculas",
             },
         ]
 
