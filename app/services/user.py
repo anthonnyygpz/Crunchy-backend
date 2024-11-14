@@ -170,28 +170,28 @@ class UserService:
                 detail="Error al cerrar sesión",
             )
 
-    def verify_email(self, token: str):
-        firebase_api_key = os.getenv("FIREBASE_API_KEY")
-        if not firebase_api_key:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="La API key de Firebase no está configurada correctamente.",
-            )
-
-        url = f'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={os.getenv('FIREBASE_API_KEY')}'
-        headers = {"Content-Type": "application/json"}
-        payload = {"requestType": "VERIFY_EMAIL", "idToken": token}
-
-        try:
-            requests.post(url, headers=headers, json=payload)
-            return {"message": "The verification email was sent to your email"}
-        except requests.exceptions.HTTPError as e:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Error al enviar el correo de verificación: {str(e)}",
-            )
-        except requests.RequestException as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error en la conexión con Firebase: {str(e)}",
-            )
+    # def verify_email(self, token: str):
+    #     firebase_api_key = os.getenv("FIREBASE_API_KEY")
+    #     if not firebase_api_key:
+    #         raise HTTPException(
+    #             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #             detail="La API key de Firebase no está configurada correctamente.",
+    #         )
+    #
+    #     url = f'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={os.getenv('FIREBASE_API_KEY')}'
+    #     headers = {"Content-Type": "application/json"}
+    #     payload = {"requestType": "VERIFY_EMAIL", "idToken": token}
+    #
+    #     try:
+    #         requests.post(url, headers=headers, json=payload)
+    #         return {"message": "The verification email was sent to your email"}
+    #     except requests.exceptions.HTTPError as e:
+    #         raise HTTPException(
+    #             status_code=status.HTTP_401_UNAUTHORIZED,
+    #             detail=f"Error al enviar el correo de verificación: {str(e)}",
+    #         )
+    #     except requests.RequestException as e:
+    #         raise HTTPException(
+    #             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #             detail=f"Error en la conexión con Firebase: {str(e)}",
+    #         )

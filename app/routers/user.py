@@ -108,6 +108,6 @@ async def logout(token: dict = Depends(verify_token)):
     return UserService().logout(token)
 
 
-@router.post("/api/verify_email/", tags=["users"])
-async def verify_email(token: str):
-    return UserService().verify_email(token)
+# @router.post("/api/verify_email/", tags=["users"])
+# async def verify_email(token: str):
+#     return UserService().verify_email(token)
