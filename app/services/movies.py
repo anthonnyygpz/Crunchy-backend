@@ -10,7 +10,7 @@ from app.utils.bucket_AWS.get_bucket import bucket_name, s3_client
 from app.utils.logger_AWS.logger import logger
 
 
-class VideoServiceDB:
+class MovieServiceDB:
     def __init__(self, db: Session):
         self.db = db
 
@@ -30,26 +30,10 @@ class VideoServiceDB:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
-    def get_videos_name(self):
+    def get_videos_name(self, skip: int, limit: int):
         try:
-            response = s3_client.list_objects_v2(Bucket=bucket_name)
-            video_extensions = (
-                ".mp4",
-                ".avi",
-                ".mov",
-                ".mkv",
-                ".flv",
-                ".wmv",
-                ".webm",
-                "",
-            )
-            videos = [
-                obj["Key"]
-                for obj in response.get("Contents", [])
-                if obj["Key"].endswith(video_extensions)
-            ]
-            logger.info(f"Lista de videos obtenida. Total: {len(videos)}")
-            return JSONResponse(content={"videos": videos})
+            movie_name = MovieDB(self.db).get_movie_name(skip, limit)
+            return movie_name
         except ClientError as e:
             logger.error(f"Error al listar videos: {str(e)}")
             raise HTTPException(status_code=500, detail="Error al listar videos")
@@ -95,3 +79,9 @@ class VideoServiceDB:
                 status_code=500,
                 detail="Error de configuración: Credenciales de AWS no encontradas",
             )
+
+    def details_movie(self, title: str):
+        title_movie = MovieDB(self.db).details_movie(title)
+        if title != title_movie:
+            return {"message": "title movie not exits"}
+        return title_movie
