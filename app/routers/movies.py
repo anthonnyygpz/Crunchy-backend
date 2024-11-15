@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
 from app.services.movies import MovieServiceDB
-from app.schemas.movies import MovieUploadData, VideoResponse
+from app.schemas.movies import MovieUploadData, MovieResponse
 
 router = APIRouter()
 
@@ -36,7 +36,7 @@ async def get_videos_name(
 
 @router.get(
     "/api/generate_urls/{video_name}",
-    response_model=VideoResponse,
+    response_model=MovieResponse,
     summary="Obtener la url.",
     description="Genera la url que mostrara la url del video.",
     tags=["movies"],
