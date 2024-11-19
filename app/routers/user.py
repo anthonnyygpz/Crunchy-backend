@@ -1,29 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
 from app.dependencies import get_db
-from sqlalchemy.orm import Session
-from dotenv import load_dotenv
-from firebase_admin import auth
-
-from app.schemas.user import UserCreate, UserUpdate, UserLogin
+from app.schemas.user import UserCreate, UserLogin, UserUpdate
 from app.services.user import UserService, UserServiceDB
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from app.utils.verify_token.verify_token import verify_token
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 load_dotenv()
 
 
 router = APIRouter()
-security = HTTPBearer()
-
-
-async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        decoded_token = auth.verify_id_token(credentials.credentials)
-        return decoded_token
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Token inválido o expirado: {str(e)}",
-        )
 
 
 @router.post(
