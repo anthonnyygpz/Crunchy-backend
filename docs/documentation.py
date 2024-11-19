@@ -25,8 +25,8 @@ def configure_docs(app: FastAPI):
                 "description": "Operaciones con peliculas",
             },
             {
-                "name": "playlists",
-                "description": "Operaciones con listas de reproduccion",
+                "name": "watch_later",
+                "description": "Operaciones con ver mas tarde",
             },
         ]
 
