@@ -5,8 +5,11 @@ from pydantic import BaseModel, EmailStr
 
 class UserBase(BaseModel):
     email: EmailStr
-    full_name: str
-    user_name: str
+    username: str
+    first_name: str
+    first_last_name: str
+    second_last_name: str
+    second_last_name: str
     profile_picture_url: Optional[str]
 
 
@@ -16,7 +19,7 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     is_active: bool
-    user_name: str
+    username: str
     profile_picture_url: str
     full_name: str
 

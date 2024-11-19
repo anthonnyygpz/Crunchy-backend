@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.crud.crud_user import UserDB
 from firebase_admin import auth
 from fastapi import HTTPException, status
-from app.db.models.user import User
+from app.db.models.users import User
 from app.schemas.user import (
     UserCreate,
     UserLoginResponse,
@@ -28,18 +28,11 @@ class UserServiceDB:
             # firebase_user = auth.get_user_by_email(email=user.email)
 
             existing_user = (
-                self.db.query(User).filter(User.user_name == user.user_name).first()
+                self.db.query(User).filter(User.username == user.username).first()
             )
             if existing_user:
                 raise HTTPException(
                     status_code=400, detail="Username already exists in database"
-                )
-            existing_user = (
-                self.db.query(User).filter(User.full_name == user.full_name).first()
-            )
-            if existing_user:
-                raise HTTPException(
-                    status_code=400, detail="Full name already exists in database"
                 )
 
             firebase_user = auth.create_user(email=user.email, password=password)
@@ -57,12 +50,14 @@ class UserServiceDB:
             user = self.user_db.get_user_by_id(user_id.uid)
             return UserResponse(
                 user_id=user_id.uid,
-                full_name=user.full_name,  # type: ignore
-                profile_picture_url=user.profile_picture_url,  # type: ignore
                 email=user.email,  # type: ignore
+                username=user.username,  # type: ignore
+                first_name=user.first_name,  # type: ignore
+                first_last_name=user.first_last_name,  # type: ignore
+                second_last_name=user.second_last_name,  # type: ignore
+                profile_picture_url=user.profile_picture_url,  # type: ignore
                 created_at=user.created_at,  # type: ignore
                 updated_at=user.updated_at,  # type: ignore
-                user_name=user.user_name,  # type: ignore
                 is_active=user.is_active,  # type: ignore
                 email_verified=user_id.email_verified,
             )

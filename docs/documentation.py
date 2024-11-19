@@ -24,6 +24,10 @@ def configure_docs(app: FastAPI):
                 "name": "movies",
                 "description": "Operaciones con peliculas",
             },
+            {
+                "name": "playlists",
+                "description": "Operaciones con listas de reproduccion",
+            },
         ]
 
         app.openapi_schema = openapi_schema
