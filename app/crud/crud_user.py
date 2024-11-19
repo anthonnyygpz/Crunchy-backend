@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy.orm import Session
-from app.db.models.user import User
+from app.db.models.users import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 
 from fastapi import HTTPException
@@ -14,7 +14,6 @@ class UserDB:
     def create_user(self, firebase_uid: str, user: UserCreate) -> Optional[UserCreate]:
         try:
             db_user = User(**user.model_dump(), user_id=firebase_uid)
-            print(db_user)
 
             existing_mysql_user = (
                 self.db.query(User).filter(User.email == user.email).first()
@@ -41,7 +40,7 @@ class UserDB:
             self.db.rollback()  # Hacemos rollback en caso de error
             raise HTTPException(status_code=500, detail=str(e))
 
-    def get_user_by_id(self, user_id: str) -> Optional[UserResponse]:
+    def get_user_by_id(self, user_id: str):
         user = self.db.query(User).filter(User.user_id == user_id).first()
         if user is None:
             raise HTTPException(status_code=404, detail="User not found DB")
