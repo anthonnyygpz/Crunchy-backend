@@ -28,6 +28,10 @@ def configure_docs(app: FastAPI):
                 "name": "watch_later",
                 "description": "Operaciones con ver mas tarde",
             },
+            {
+                "name": "categories",
+                "description": "Operaciones con categorias",
+            },
         ]
 
         app.openapi_schema = openapi_schema
