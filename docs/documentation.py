@@ -32,6 +32,10 @@ def configure_docs(app: FastAPI):
                 "name": "categories",
                 "description": "Operaciones con categorias",
             },
+            {
+                "name": "history",
+                "description": "Operaciones con historial",
+            },
         ]
 
         app.openapi_schema = openapi_schema

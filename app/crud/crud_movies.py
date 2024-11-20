@@ -2,7 +2,7 @@ from botocore.docs.bcdoc.docstringparser import PRIORITY_PARENT_TAGS
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.db.models.movies import Movie
+from app.db.models.movies import Movies
 from app.schemas.movies import MovieUploadData
 
 
@@ -12,7 +12,7 @@ class MovieDB:
 
     def upload_movie_data(self, movie: MovieUploadData, duration: int):
         try:
-            db_movie = Movie(**movie.model_dump(), duration=duration)
+            db_movie = Movies(**movie.model_dump(), duration=duration)
             self.db.add(db_movie)
             self.db.commit()
             self.db.refresh(db_movie)
@@ -26,7 +26,10 @@ class MovieDB:
     def get_movie_name(self, skip: int, limit: int):
         try:
             db_movie = (
-                self.db.query(Movie.title).offset((skip - 1) * limit).limit(limit).all()
+                self.db.query(Movies.title)
+                .offset((skip - 1) * limit)
+                .limit(limit)
+                .all()
             )
 
             return [title.title for title in db_movie]
@@ -39,7 +42,7 @@ class MovieDB:
 
     def details_movie(self, title: str):
         try:
-            db_movie = self.db.query(Movie).filter(Movie.title == title).first()
+            db_movie = self.db.query(Movies).filter(Movies.title == title).first()
 
             return db_movie
         except HTTPException as he:
