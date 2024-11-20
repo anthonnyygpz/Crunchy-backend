@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import categories, history, movies, user, watch_later
+from app.routers import categories, history, movie_categories, movies, user, watch_later
 from docs.documentation import configure_docs
 
 app = FastAPI(title="Crunchy", version="1.0.0")
@@ -10,6 +10,7 @@ app.include_router(movies.router)
 app.include_router(watch_later.router)
 app.include_router(categories.router)
 app.include_router(history.router)
+app.include_router(movie_categories.router)
 
 app.add_middleware(
     CORSMiddleware,
