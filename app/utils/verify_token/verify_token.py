@@ -21,13 +21,13 @@ async def verify_token(
             user = db.query(User).filter(User.user_id == uid).first()
 
             decoded_token["is_admin"] = bool(user and user.is_admin)
+            return decoded_token
         except Exception as db_error:
             decoded_token["is_admin"] = False
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Error en base de datos: {db_error}",
             )
-        return decoded_token
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,4 +41,12 @@ async def is_admin(token: dict = Depends(verify_token)):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acceso denegado. Se requieren privilegios de administrador",
         )
+    return token
+
+
+async def get_current_user(token: dict = Depends(verify_token)):
+    """
+    Dependency to get the current authenticated user.
+    Works for both admin and regular users.
+    """
     return token
