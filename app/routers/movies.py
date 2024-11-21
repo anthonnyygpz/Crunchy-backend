@@ -13,7 +13,7 @@ router = APIRouter()
     # response_model=Mov,
     summary="Subir videos.",
     description="Almacena los videos para mostrar en la aplicacion web.",
-    tags=["movies"],
+    tags=["movies-admin"],
 )
 async def uploads(
     movie: MovieUploadData, file_path: str, db: Session = Depends(get_db)
@@ -26,7 +26,7 @@ async def uploads(
     # response_model=dict,
     summary="Listar los videos.",
     description="Lista todo los video que hay almacenados.",
-    tags=["movies"],
+    tags=["movies-admin"],
 )
 async def get_videos_name(
     skip: int = 1, limit: int = 100, db: Session = Depends(get_db)
@@ -39,7 +39,7 @@ async def get_videos_name(
     response_model=MovieResponse,
     summary="Obtener la url.",
     description="Genera la url que mostrara la url del video.",
-    tags=["movies"],
+    tags=["movies-admin"],
 )
 async def generate_urls(video_name: str, db: Session = Depends(get_db)):
     return MovieServiceDB(db).generate_urls(video_name)
@@ -49,7 +49,7 @@ async def generate_urls(video_name: str, db: Session = Depends(get_db)):
     "/api/details_movie",
     summary="Detalles de las peliculas",
     description="Obtiene los detalles de las peliculas.",
-    tags=["movies"],
+    tags=["movies-admin"],
 )
 async def details_movie(title: str, db: Session = Depends(get_db)):
     return MovieServiceDB(db).details_movie(title)

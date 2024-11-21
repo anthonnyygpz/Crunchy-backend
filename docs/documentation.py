@@ -17,7 +17,7 @@ def configure_docs(app: FastAPI):
         # Personalizar documentación por módulos
         openapi_schema["tags"] = [
             {
-                "name": "categories",
+                "name": "categories-admin",
                 "description": "Operaciones con categorias",
             },
             {
@@ -25,11 +25,11 @@ def configure_docs(app: FastAPI):
                 "description": "Operaciones con historial",
             },
             {
-                "name": "movie_categories",
+                "name": "movie_categories-admin",
                 "description": "Operaciones con categorias de peliculas",
             },
             {
-                "name": "movies",
+                "name": "movies-admin",
                 "description": "Operaciones con peliculas",
             },
             {

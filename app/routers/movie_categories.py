@@ -7,24 +7,24 @@ from app.services.movie_categories import MovieCategoriesService
 router = APIRouter()
 
 
-@router.post("/api/add_to_movie_categories", tags=["movie_categories"])
+@router.post("/api/add_to_movie_categories", tags=["movie_categories-admin"])
 async def add_to_movie_categories(
     movie_id: int, category_id: int, db: Session = Depends(get_db)
 ):
     return MovieCategoriesService(db).add_to_movie_categories(movie_id, category_id)
 
 
-@router.get("/api/get_movie_categories", tags=["movie_categories"])
+@router.get("/api/get_movie_categories", tags=["movie_categories-admin"])
 async def get_movie_categories(db: Session = Depends(get_db)):
     return MovieCategoriesService(db).get_movie_categories()
 
 
-@router.put("/api/update_movie_categories", tags=["movie_categories"])
+@router.put("/api/update_movie_categories", tags=["movie_categories-admin"])
 async def update_movie_categories(db: Session = Depends(get_db)):
     return MovieCategoriesService(db)
 
 
-@router.delete("/api/delete_movie_categories", tags=["movie_categories"])
+@router.delete("/api/delete_movie_categories", tags=["movie_categories-admin"])
 async def delete_movie_categories(
     movie_category_id: int, db: Session = Depends(get_db)
 ):
