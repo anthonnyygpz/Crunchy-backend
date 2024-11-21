@@ -9,15 +9,14 @@ class CategoriesDB:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_categories(
-        self,
-        category: CreateCategoriesSchema,
-    ):
+    def create_categories(self, category: CreateCategoriesSchema):
         try:
             db_categories = Categories(**category.model_dump())
+
             self.db.add(db_categories)
             self.db.commit()
             self.db.refresh(db_categories)
+
             return db_categories
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error: {str(e)}")

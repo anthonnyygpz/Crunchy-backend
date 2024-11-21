@@ -17,5 +17,6 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=False)
     is_active = Column(Boolean(), default=1, nullable=False)
+    is_admin = Column(Boolean(), default=0, nullable=False)
 
     history = relationship("History", back_populates="users")
