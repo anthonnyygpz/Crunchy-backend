@@ -1,7 +1,7 @@
 from app.dependencies import get_db
 from app.schemas.user import UserCreate, UserLogin, UserUpdate
 from app.services.user import UserService, UserServiceDB
-from app.utils.verify_token.verify_token import verify_token
+from app.utils.verify_token.verify_token import get_current_user
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -30,7 +30,7 @@ async def create_user(user: UserCreate, password: str, db: Session = Depends(get
     tags=["users"],
 )
 async def get_user_current_data(
-    token: dict = Depends(verify_token), db: Session = Depends(get_db)
+    token: dict = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     return UserServiceDB(db).get_user_current_data(token)
 
@@ -42,7 +42,9 @@ async def get_user_current_data(
     tags=["users"],
 )
 async def update_user(
-    user: UserUpdate, token: dict = Depends(verify_token), db: Session = Depends(get_db)
+    user: UserUpdate,
+    token: dict = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     return UserServiceDB(db).update_user(user, token)
 
@@ -54,7 +56,7 @@ async def update_user(
     tags=["users"],
 )
 async def delete_user(
-    token: dict = Depends(verify_token), db: Session = Depends(get_db)
+    token: dict = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     return UserServiceDB(db).delete_user(token)
 
@@ -90,10 +92,10 @@ async def login(user: UserLogin):
     description="Se cierra la sesion del token.",
     tags=["users"],
 )
-async def logout(token: dict = Depends(verify_token)):
+async def logout(token: dict = Depends(get_current_user)):
     return UserService().logout(token)
 
 
 @router.post("/api/verify_email/", tags=["users"])
-async def verify_email(token: str):
+async def verify_email(token: str = Depends(get_current_user)):
     return UserService().verify_email(token)

@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Boolean, Integer, String, DateTime, Numeric, Text
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.database import Base
 
 
-class Movie(Base):
+class Movies(Base):
     __tablename__ = "movies"
 
     movie_id = Column(
@@ -20,3 +21,5 @@ class Movie(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=False, onupdate=func.now())
     is_active = Column(Boolean, nullable=False, default=1)
+
+    history = relationship("History", back_populates="movies")

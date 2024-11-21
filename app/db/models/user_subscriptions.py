@@ -4,6 +4,8 @@ from app.db.database import Base
 
 
 class UserSubscriptions(Base):
+    __tablename__ = "user_subscriptions"
+
     subscription_id = Column(
         Integer, nullable=False, primary_key=True, autoincrement=True
     )

@@ -13,9 +13,8 @@ class History(Base):
     user_id = Column(String(128), ForeignKey("users.user_id"))
     movie_id = Column(Integer, ForeignKey("movies.movie_id"))
     watch_date = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    watch_duration = Column(Integer, nullable=False)
     completed = Column(Boolean, nullable=False, default=False)
-    last_position = Column(Integer, nullable=False)
+    last_position = Column(Integer, nullable=True, default=0)
 
-    user = relationship("User", back_populates="history")
-    movie = relationship("Movie", back_populates="history")
+    users = relationship("User", back_populates="history")
+    movies = relationship("Movies", back_populates="history")
