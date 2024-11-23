@@ -35,13 +35,14 @@ async def create_user(user: UserCreate, password: str, db: Session = Depends(get
 
 @router.get(
     "/get_user_current_data",
-    summary="Obtener los datos del usuario.",
-    description="Obtiene todo datos del usuario.",
-    tags=["users"],
 )
 async def get_user_current_data(
     token: dict = Depends(get_current_user), db: Session = Depends(get_db)
 ):
+    """
+    Obtiene todo los datos del usuario:
+    """
+
     return UserServiceDB(db).get_user_current_data(token)
 
 
