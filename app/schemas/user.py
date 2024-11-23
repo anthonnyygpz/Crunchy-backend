@@ -9,12 +9,11 @@ class UserBase(BaseModel):
     first_name: str
     first_last_name: str
     second_last_name: str
-    second_last_name: str
     profile_picture_url: Optional[str]
 
 
 class UserCreate(UserBase):
-    pass
+    is_admin: bool = False
 
 
 class UserUpdate(BaseModel):
@@ -38,7 +37,7 @@ class UserLoginResponse(BaseModel):
 class UserResponse(UserBase):
     user_id: str
     created_at: datetime
-    updated_at: datetime
+    # updated_at: datetime
     is_active: bool
     email_verified: bool
 
