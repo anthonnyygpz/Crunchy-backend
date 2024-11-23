@@ -40,6 +40,7 @@ class UserResponse(UserBase):
     # updated_at: datetime
     is_active: bool
     email_verified: bool
+    is_admin: bool
 
     class Config:
         from_attributes = True

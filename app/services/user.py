@@ -60,6 +60,7 @@ class UserServiceDB:
                 updated_at=user.updated_at,  # type: ignore
                 is_active=user.is_active,  # type: ignore
                 email_verified=user_id.email_verified,
+                is_admin=user.is_admin,  # typé: ignore
             )
         except Exception as e:
             raise HTTPException(
