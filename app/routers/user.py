@@ -47,66 +47,75 @@ async def get_user_current_data(
 
 
 @router.put(
-    "/update_users/",
-    summary="Actualizar datos del usuario.",
-    description="Aquí se le asigna el nombre al usuario",
-    tags=["users"],
+    "/update_users",
 )
 async def update_user(
     user: UserUpdate,
     token: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """
+    Actualiza los datos de la base de datos con lo siguientes datos:
+    - **username**: Es el nombre el usuario que solo se le mostrara al usuario.
+    - **first_name**: Es el nombre(s) del usuario.
+    - **first_last_name**: Es el primer apellido o apellido paterno.
+    - **second_last_name**: Es el segundo apellido o apellido materno.
+    - **profile_picture_url**: Es la url de la imagen que se usara.
+    - **is_active**: bool
+    """
     return UserServiceDB(db).update_user(user, token)
 
 
-@router.delete(
-    "/delete_users/",
-    summary="Borrar usuario",
-    description="Borrar al usuario",
-    tags=["users"],
-)
+@router.delete("/delete_users")
 async def delete_user(
     token: dict = Depends(get_current_user), db: Session = Depends(get_db)
 ):
+    """
+    Desabilita al usuario de la base de datos:
+    """
     return UserServiceDB(db).delete_user(token)
 
 
-@router.post(
-    "/password_reset/{email}",
-    summary="Reiniciar contraseña",
-    description="Envia un a tu correo un link para cambiar la contraseña.",
-    tags=["users"],
-)
+@router.post("/password_reset")
 async def password_reset(email: str):
+    """
+    Se envia a tu correo un link para reiniciar tu contraseña:
+    - **email**: Es un correo electronico que que si exista (Obligatorio).
+    """
     return UserService().password_reset(email)
 
 
-@router.post("/api/refresh-token/", tags=["users"])
+@router.post("/refresh-token")
 async def refresh_token(refresh_token: str):
+    """
+    Vulve a refrescar el token para que no se tenga que volver a inicar sesion:
+    - **refresh-token**: Es el refresh_token que se genera al momento de iniciar sesion (Obligatorio).
+
+    """
     return UserService().refresh_token(refresh_token)
 
 
-@router.post(
-    "/login/",
-    summary="Iniciar sesion",
-    description="Se inicia sesion con el token generado.",
-    tags=["users"],
-)
+@router.post("/login")
 async def login(user: UserLogin):
+    """
+    Inicia sesion generando un token y un refresh_token con lo sigueintes datos:
+    - **email**: Es el correo electronico que se usara para iniciar sesion (Obligatorio).
+    - **password**: Es la contraseña que se usara para iniciar sesion (Obligatorio).
+    """
     return UserService().login(user)
 
 
-@router.post(
-    "/logout/",
-    summary="Cerrar sesion.",
-    description="Se cierra la sesion del token.",
-    tags=["users"],
-)
+@router.post("/logout")
 async def logout(token: dict = Depends(get_current_user)):
+    """
+    Cierra sesion del usuario.
+    """
     return UserService().logout(token)
 
 
-@router.post("/verify_email/", tags=["users"])
+@router.post("/verify_email")
 async def verify_email(token: str = Depends(get_current_user)):
+    """
+    Se envia un link al correo para verificar la cuenta.
+    """
     return UserService().verify_email(token)

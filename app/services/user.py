@@ -25,8 +25,6 @@ class UserServiceDB:
 
     def create_user(self, user: UserCreate, password: str) -> Optional[UserCreate]:
         try:
-            # firebase_user = auth.get_user_by_email(email=user.email)
-
             existing_user = (
                 self.db.query(User).filter(User.username == user.username).first()
             )
@@ -60,7 +58,7 @@ class UserServiceDB:
                 updated_at=user.updated_at,  # type: ignore
                 is_active=user.is_active,  # type: ignore
                 email_verified=user_id.email_verified,
-                is_admin=user.is_admin,  # typé: ignore
+                is_admin=user.is_admin,  # type: ignore
             )
         except Exception as e:
             raise HTTPException(
