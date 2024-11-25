@@ -13,7 +13,7 @@ class User(Base):
     first_name = Column(String(80), nullable=False)
     first_last_name = Column(String(50), nullable=False)
     second_last_name = Column(String(50), nullable=False)
-    profile_picture_url = Column(Text, nullable=True, default=True)
+    profile_picture_url = Column(Text, nullable=True, default=null)
     created_at = Column(DateTime(timezone=True), default=func.now(), nullable=False)
     updated_at = Column(
         DateTime(timezone=True), default=func.now(), onupdate=func.now(), nullable=False
