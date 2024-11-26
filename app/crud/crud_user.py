@@ -1,7 +1,6 @@
-from typing import Optional
 from sqlalchemy.orm import Session
 from app.db.models.users import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import CreateUserSchema, UpdateUserSchema
 
 from fastapi import HTTPException
 from firebase_admin import auth
@@ -11,7 +10,7 @@ class UserDB:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_user(self, firebase_uid: str, user: UserCreate) -> Optional[UserCreate]:
+    def create_user(self, firebase_uid: str, user: CreateUserSchema):
         try:
             db_user = User(
                 **user.model_dump(exclude={"password"}), user_id=firebase_uid
@@ -28,18 +27,16 @@ class UserDB:
             self.db.add(db_user)
             self.db.commit()
             self.db.refresh(db_user)
-            return db_user
 
+            return {"message": "Register user successfully"}
         except auth.EmailAlreadyExistsError:
             raise HTTPException(
                 status_code=400, detail="Email already exists in Firebase"
             )
         except HTTPException as he:
-            raise HTTPException(
-                status_code=400, detail=str(he)
-            )  # Re-lanzamos las HTTP exceptions que ya hemos creado
+            raise HTTPException(status_code=400, detail=str(he))
         except Exception as e:
-            self.db.rollback()  # Hacemos rollback en caso de error
+            self.db.rollback()
             raise HTTPException(status_code=500, detail=str(e))
 
     def get_user_by_id(self, user_id: str):
@@ -48,7 +45,7 @@ class UserDB:
             raise HTTPException(status_code=404, detail="User not found DB")
         return user
 
-    def update_user(self, user: UserUpdate, token: dict):
+    def update_user(self, user: UpdateUserSchema, token: dict):
         try:
             db_user = self.db.query(User).filter(User.user_id == token["uid"]).first()
             if not db_user:
@@ -75,3 +72,4 @@ class UserDB:
             return {"message": "User deleted successfully"}
         except Exception as e:
             raise HTTPException(status_code=404, detail=f"User not found: {str(e)}")
+
