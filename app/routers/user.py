@@ -1,12 +1,9 @@
 from app.dependencies import get_db
-from app.schemas.user import UserCreate, UserLogin, UserUpdate
+from app.schemas.user import CreateUserSchema, LoginUserSchema, UpdateUserSchema
 from app.services.user import UserService, UserServiceDB
 from app.utils.verify_token.verify_token import get_current_user
-from dotenv import load_dotenv
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
-load_dotenv()
 
 
 router = APIRouter(
@@ -16,11 +13,8 @@ router = APIRouter(
 )
 
 
-@router.post(
-    "/register_users",
-    response_model=UserCreate,
-)
-async def create_user(user: UserCreate, password: str, db: Session = Depends(get_db)):
+@router.post("/register_users")
+async def create_user(user: CreateUserSchema, db: Session = Depends(get_db)):
     """
     Registra el usuario en la base de datos con los siguiente datos:
     - **email**: Es el correo que se usara para crear la cuenta (Obligatorio).
@@ -30,7 +24,7 @@ async def create_user(user: UserCreate, password: str, db: Session = Depends(get
     - **second_last_name**: Es el segundo apellido o apellido materno (Obligatorio).
     - **profile_picture_url**: Es la url de la imagen que se usara (Opcional).
     """
-    return UserServiceDB(db).create_user(user, password)
+    return UserServiceDB(db).create_user(user)
 
 
 @router.get(
@@ -50,7 +44,7 @@ async def get_user_current_data(
     "/update_users",
 )
 async def update_user(
-    user: UserUpdate,
+    user: UpdateUserSchema,
     token: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -71,7 +65,7 @@ async def delete_user(
     token: dict = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """
-    Desabilita al usuario de la base de datos:
+    Se elimina al usuario de la base de datos:
     """
     return UserServiceDB(db).delete_user(token)
 
@@ -96,7 +90,7 @@ async def refresh_token(refresh_token: str):
 
 
 @router.post("/login")
-async def login(user: UserLogin):
+async def login(user: LoginUserSchema):
     """
     Inicia sesion generando un token y un refresh_token con lo sigueintes datos:
     - **email**: Es el correo electronico que se usara para iniciar sesion (Obligatorio).
@@ -119,3 +113,4 @@ async def verify_email(token: str = Depends(get_current_user)):
     Se envia un link al correo para verificar la cuenta.
     """
     return UserService().verify_email(token)
+

@@ -1,21 +1,17 @@
-from typing import Optional
 from sqlalchemy.orm import Session
 from app.crud.crud_user import UserDB
 from firebase_admin import auth
 from fastapi import HTTPException, status
 from app.db.models.users import User
 from app.schemas.user import (
-    UserCreate,
-    UserLoginResponse,
-    UserResponse,
-    UserUpdate,
-    UserLogin,
+    CreateUserSchema,
+    LoginResponseSchema,
+    ResponseUserSchema,
+    UpdateUserSchema,
+    LoginUserSchema,
 )
-from dotenv import load_dotenv
 import requests
 import os
-
-load_dotenv()
 
 
 class UserServiceDB:
@@ -23,7 +19,7 @@ class UserServiceDB:
         self.user_db = UserDB(db)
         self.db = db
 
-    def create_user(self, user: UserCreate, password: str) -> Optional[UserCreate]:
+    def create_user(self, user: CreateUserSchema):
         try:
             existing_user = (
                 self.db.query(User).filter(User.username == user.username).first()
@@ -33,8 +29,23 @@ class UserServiceDB:
                     status_code=400, detail="Username already exists in database"
                 )
 
-            firebase_user = auth.create_user(email=user.email, password=password)
-            firebase_uid = firebase_user.uid
+            try:
+                firebase_user = auth.create_user(
+                    email=user.email, password=user.password
+                )
+                firebase_uid = firebase_user.uid
+            except auth.EmailAlreadyExistsError:
+                firebase_user = auth.get_user_by_email(user.email)
+                firebase_uid = firebase_user.uid
+
+                existing_firebase_user = (
+                    self.db.query(User).filter(User.user_id == firebase_uid).first()
+                )
+                if existing_firebase_user:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="User already exists in both Firebase and MySQL",
+                    )
 
             return self.user_db.create_user(firebase_uid, user)
         except HTTPException as e:
@@ -42,11 +53,11 @@ class UserServiceDB:
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-    def get_user_current_data(self, token: dict):
+    def get_user_current_data(self, token: dict) -> ResponseUserSchema:
         try:
             user_id = auth.get_user(token["uid"])
             user = self.user_db.get_user_by_id(user_id.uid)
-            return UserResponse(
+            return ResponseUserSchema(
                 user_id=user_id.uid,
                 email=user.email,  # type: ignore
                 username=user.username,  # type: ignore
@@ -66,7 +77,7 @@ class UserServiceDB:
                 detail=f"Error al obtener información del usuario: {str(e)}",
             )
 
-    def update_user(self, user: UserUpdate, token: dict):
+    def update_user(self, user: UpdateUserSchema, token: dict):
         return self.user_db.update_user(user, token)
 
     def delete_user(self, token: dict):
@@ -112,7 +123,7 @@ class UserService:
                 detail="Error en la conexión con Firebase",
             )
 
-    def login(self, user: UserLogin):
+    def login(self, user: LoginUserSchema):
         try:
             url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={os.getenv('FIREBASE_API_KEY')}"
 
@@ -142,7 +153,7 @@ class UserService:
                     status_code=status.HTTP_401_UNAUTHORIZED, detail=detail
                 )
 
-            return UserLoginResponse(
+            return LoginResponseSchema(
                 email=response.json()["email"],
                 token=response.json()["idToken"],
                 refresh_token=response.json()["refreshToken"],
@@ -189,3 +200,4 @@ class UserService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error en la conexión con Firebase: {str(e)}",
             )
+
