@@ -13,7 +13,9 @@ class UserDB:
 
     def create_user(self, firebase_uid: str, user: UserCreate) -> Optional[UserCreate]:
         try:
-            db_user = User(**user.model_dump(), user_id=firebase_uid)
+            db_user = User(
+                **user.model_dump(exclude={"password"}), user_id=firebase_uid
+            )
 
             existing_mysql_user = (
                 self.db.query(User).filter(User.email == user.email).first()
