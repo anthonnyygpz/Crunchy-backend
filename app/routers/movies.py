@@ -15,7 +15,6 @@ router = APIRouter(
 
 @router.post(
     "/uploads",
-    # response_model=Mov,
     summary="Subir videos.",
     description="Almacena los videos para mostrar en la aplicacion web.",
     tags=["movies-admin"],
@@ -31,14 +30,12 @@ async def uploads(
 
 @router.get(
     "/get_videos_name",
-    # response_model=dict,
     summary="Listar los videos.",
     description="Lista todo los video que hay almacenados.",
 )
 async def get_videos_name(
     skip: int = 1,
     limit: int = 100,
-    token: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     return MovieServiceDB(db).get_videos_name(skip, limit)
@@ -51,9 +48,7 @@ async def get_videos_name(
     description="Genera la url que mostrara la url del video.",
     tags=["movies-admin"],
 )
-async def generate_urls(
-    video_name: str, token: dict = Depends(is_admin), db: Session = Depends(get_db)
-):
+async def generate_urls(video_name: str, db: Session = Depends(get_db)):
     return MovieServiceDB(db).generate_urls(video_name)
 
 
@@ -63,7 +58,5 @@ async def generate_urls(
     description="Obtiene los detalles de las peliculas.",
     tags=["movies-admin"],
 )
-async def details_movie(
-    title: str, token: dict = Depends(get_current_user), db: Session = Depends(get_db)
-):
+async def details_movie(title: str, db: Session = Depends(get_db)):
     return MovieServiceDB(db).details_movie(title)
