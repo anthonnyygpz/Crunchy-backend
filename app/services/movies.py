@@ -82,6 +82,6 @@ class MovieServiceDB:
 
     def details_movie(self, title: str):
         title_movie = MovieDB(self.db).details_movie(title)
-        if title != title_movie:
+        if not title_movie:
             return {"message": "title movie not exits"}
         return title_movie
